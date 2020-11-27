@@ -13,18 +13,18 @@
  * Represents a device to which register values will be written
  * Each register is 8-bits wide, with address from [0, 255]
  */
-struct device_config {
+struct regmap_dev_conf {
 	/**
 	 * NOTES: There are no read/write register protection
 	 */
 	/**
-	 * Reads a register
+	 * Reads N bytes from a register
 	 * Returns a negative number on error
 	 * Not nullable
 	 */
 	int (*reg_read)(void *dev_data, uint8_t reg, uint8_t n, uint8_t *vals);
 	/**
-	 * Writes a register
+	 * Writes N bytes to a register
 	 * Returns a negative number on error
 	 * Not nullable
 	 */
@@ -64,25 +64,25 @@ struct reg_field {
  * @param val Location to store the value of the register
  * @param dev The dev to read the field over
  */
-int reg_read(struct reg_field *field, uint8_t *val, struct device_config *dev);
+int reg_read(struct reg_field *field, uint8_t *val, struct regmap_dev_conf *dev);
 /**
  * Writes a value to a register
  * @param field The field to write to
  * @param val Value to write
  * @param dev The dev to read the field over
  */
-int reg_write(struct reg_field *field, uint8_t val, struct device_config *dev);
+int reg_write(struct reg_field *field, uint8_t val, struct regmap_dev_conf *dev);
 /**
  * Burst reads N registers from a device
  */
-inline int burst_read(uint8_t reg, uint8_t n, uint8_t *vals, struct device_config *dev)
+inline int burst_read(uint8_t reg, uint8_t n, uint8_t *vals, struct regmap_dev_conf *dev)
 {
 	return dev->reg_read(dev->dev_data, reg, n, vals);
 }
 /**
  * Burst writes N registers to a device
  */
-inline int burst_write(uint8_t reg, uint8_t n, uint8_t *vals, struct device_config *dev)
+inline int burst_write(uint8_t reg, uint8_t n, uint8_t *vals, struct regmap_dev_conf *dev)
 {
 	return dev->reg_write(dev->dev_data, reg, n, vals);
 }

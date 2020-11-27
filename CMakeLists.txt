@@ -4,6 +4,7 @@ project(driver-regmaps C)
 include_directories(inc)
 
 add_subdirectory(regmap)
+add_subdirectory(ms5611)
 
 add_executable(test test.c)
 target_link_libraries(test regmap)

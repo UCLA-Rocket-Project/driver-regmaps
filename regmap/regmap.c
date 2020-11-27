@@ -1,6 +1,6 @@
 #include <regmap/regmap.h>
 
-int reg_read(struct reg_field *field, uint8_t *val, struct device_config *dev)
+int reg_read(struct reg_field *field, uint8_t *val, struct regmap_dev_conf *dev)
 {
 	int r = dev->reg_read(dev->dev_data, field->reg, 1, val);
 	if(r < 0) {
@@ -10,7 +10,7 @@ int reg_read(struct reg_field *field, uint8_t *val, struct device_config *dev)
 	return 0;
 }
 
-int reg_write(struct reg_field *field, uint8_t val, struct device_config *dev)
+int reg_write(struct reg_field *field, uint8_t val, struct regmap_dev_conf *dev)
 {
 	uint8_t actualValue;
 	// in the case where the mask is the whole bit, we can just write the whole thing at once

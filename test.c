@@ -15,7 +15,7 @@ int mock_write(void *_, uint8_t reg, uint8_t n, uint8_t *vals) {
     return 0;
 }
 
-struct device_config mockDev = {
+struct regmap_dev_conf mockDev = {
     .reg_read = mock_read,
     .reg_write = mock_write
 };
