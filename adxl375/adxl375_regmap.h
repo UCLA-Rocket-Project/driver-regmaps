@@ -2,7 +2,7 @@
 #ifndef ADXL375_REGMAP_H
 #define ADXL375_REGMAP_H
 #include <stdint.h>
-#include <regmap/regmap.h>
+#include <regmap/register.h>
 
 REG_BYTE(DEVICE_ID, 0)
 REG_BYTE(THRESH_SHOCK, 0x1D)

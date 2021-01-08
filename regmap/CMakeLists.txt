@@ -1,2 +1,2 @@
-add_library(regmap regmap.c include/regmap/bitmask.h include/regmap/byteorder.h include/regmap/driver_impl.h include/regmap/regmap.h)
-target_include_directories(regmap PUBLIC include)
+add_library(regmap INTERFACE)
+target_include_directories(regmap INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)

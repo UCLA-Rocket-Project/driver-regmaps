@@ -2,7 +2,7 @@
 #ifndef MS5611_LOWLEVEL_H
 #define MS5611_LOWLEVEL_H
 #include <stdint.h>
-#include "regmap/regmap.h"
+#include "regmap/register.h"
 
 // I2C / SPI commands
 #define MS5611_CMD_RESET 0x1E
