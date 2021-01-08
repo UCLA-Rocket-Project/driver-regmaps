@@ -1,53 +1,98 @@
-#pragma once
-#ifndef MS5611_LOWLEVEL_H
-#define MS5611_LOWLEVEL_H
-#include <stdint.h>
-#include <regmap/register.h>
+#include <regmap/bus.h>
+#include <regmap/endianfix.h>
+#include <memory>
+#include "ms5611_defs.h"
 
-// I2C / SPI commands
-#define MS5611_CMD_RESET 0x1E
-#define MS5611_CMD_D1 0x40
-#define MS5611_CMD_D2 0x50
-#define MS5611_CMD_ADC_READ 0x00
-#define MS5611_CMD_PROM_READ 0xA0
+namespace ms5611 {
+	class MS5611 {
+	public:
+		std::shared_ptr<regmap::Bus> bus;
+		unsigned int devAddr;
+		uint16_t prom[PROM_FIELD::__COUNT];
+		bool promRead = false; // we only need to read prom once
+		OSR lastOsr;
+		CMD lastCmd;
 
-enum ms5611_prom_field {
-	MS5611_PROM_FACTORY,
-	MS5611_PROM_SENSt1,
-	MS5611_PROM_OFFt1,
-	MS5611_PROM_TCS,
-	MS5611_PROM_TCO,
-	MS5611_PROM_Tref,
-	MS5611_PROM_TEMPSENS,
-	MS5611_PROM_CRC
-};
-enum ms5611_osr_rate {
-	MS5611_OSR_256,
-	MS5611_OSR_512,
-	MS5611_OSR_1024,
-	MS5611_OSR_2048,
-	MS5611_OSR_4096
-};
-/**
- * Resets a device
- */
-int ms5611_reset(struct reg_bus* dev);
-/**
- * Reads in a PROM field
- */
-int ms5611_read_prom(enum ms5611_prom_field field, uint16_t* val, struct reg_bus *dev);
-/**
- * Starts a pressure conversion
- */
-int ms5611_start_press_conv(enum ms5611_osr_rate osrRate, struct reg_bus* dev);
-/**
- * Starts a temperature conversion
- */
-int ms5611_start_temp_conv(enum ms5611_osr_rate osrRate, struct reg_bus* dev);
-/**
- * Reads back the conversion result
- * @param val The pointer to hold the result. NOTE: this is 24-bits only.
- */
-int ms5611_read_conv(uint32_t *val, struct reg_bus* dev);
+		// intermediate variables for calculating the altitude
+		int32_t dT;
+		int32_t temp;
+		int64_t off;
+		int64_t sens;
+		int32_t press;
 
-#endif
+		uint32_t lastTempReading;
+		uint32_t lastPressureReading;
+
+		MS5611(std::shared_ptr<regmap::Bus> bus, unsigned int addr):
+			bus(std::move(bus)), devAddr(addr) {};
+
+		int reset() {
+			return bus->write(devAddr, CMD::RESET, nullptr, 0);
+		}
+		int readProm() {
+			if(promRead) {
+				return 1;
+			}
+			int r;
+			for(int i = 0; i < PROM_FIELD::__COUNT; i++) {
+				r = bus->read(devAddr, CMD::PROM_READ | (i << 1), (uint8_t*)&prom[i], 2);
+				if(r < 0) {
+					return r;
+				}
+				prom[i] = endianfix::fixEndianess<endianfix::endian::big>(prom[i]);
+			}
+			promRead = true;
+			return 0;
+		}
+		int startPressureConversion(OSR osr) {
+			int r;
+			r = bus->write(devAddr, CMD::D1_BASE | (osr << 1), 0, NULL);
+			if(r < 0) {
+				return r;
+			}
+			lastCmd = CMD::D1_BASE;
+			lastOsr = osr;
+			return 0;
+		}
+		int startTempConversion(OSR osr) {
+			int r;
+			r = bus->write(devAddr, CMD::D2_BASE | (osr << 1), 0, NULL);
+			if(r < 0) {
+				return r;
+			}
+			lastCmd = CMD::D2_BASE;
+			lastOsr = osr;
+			return 0;
+		}
+		uint32_t sleepDurationUsec() {
+			return 1000000 >> (lastOsr + 8);
+		}
+		int readConversionResult(uint32_t &result) {
+			int r;
+			endianfix::uint24_t res;
+			r = bus->read(devAddr, CMD::ADC_READ, res, 3);
+			if(r < 0) {
+				return r;
+			}
+			result = endianfix::fixEndianess<endianfix::endian::big>(res);
+			if(lastCmd == D1_BASE) {
+				lastPressureReading = result;
+				off = (prom[2] << 16) + ((prom[4] * dT) >> 7);
+				sens = (prom[1] << 15) + ((prom[3] * dT) >> 8);
+				press = (lastPressureReading * (sens >> 21) - off) >> 15;
+			}
+			else {
+				lastTempReading = result;
+				dT = lastTempReading - (prom[5] << 8);
+				temp = 2000 + ((dT * prom[6]) >> 23);
+			}
+			return 0;
+		}
+		float pressure() {
+			return press / 100.0;
+		}
+		float temperature() {
+			return temp / 100.0;
+		}
+	};
+}
