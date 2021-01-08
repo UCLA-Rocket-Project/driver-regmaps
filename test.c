@@ -1,6 +1,6 @@
 #include <stdio.h>
-#include <regmap/regmap.h>
-#include <regmap/bitmask.h>
+#include "include/regmap.h"
+#include "include/bitmask.h"
 #include <assert.h>
 
 int mock_read(void *_, uint8_t reg, uint8_t n, uint8_t *vals) {
@@ -15,7 +15,7 @@ int mock_write(void *_, uint8_t reg, uint8_t n, uint8_t *vals) {
     return 0;
 }
 
-struct regmap_dev_conf mockDev = {
+struct reg_bus mockDev = {
     .reg_read = mock_read,
     .reg_write = mock_write
 };

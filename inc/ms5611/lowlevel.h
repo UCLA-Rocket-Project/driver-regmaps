@@ -2,7 +2,7 @@
 #ifndef MS5611_LOWLEVEL_H
 #define MS5611_LOWLEVEL_H
 #include <stdint.h>
-#include <regmap/regmap.h>
+#include "regmap/regmap.h"
 
 // I2C / SPI commands
 #define MS5611_CMD_RESET 0x1E
@@ -31,22 +31,23 @@ enum ms5611_osr_rate {
 /**
  * Resets a device
  */
-int ms5611_reset(struct regmap_dev_conf* dev);
+int ms5611_reset(struct reg_bus* dev);
 /**
  * Reads in a PROM field
  */
-int ms5611_read_prom(enum ms5611_prom_field field, uint16_t* val, struct regmap_dev_conf *dev);
+int ms5611_read_prom(enum ms5611_prom_field field, uint16_t* val, struct reg_bus *dev);
 /**
  * Starts a pressure conversion
  */
-int ms5611_start_press_conv(enum ms5611_osr_rate osrRate, struct regmap_dev_conf* dev);
+int ms5611_start_press_conv(enum ms5611_osr_rate osrRate, struct reg_bus* dev);
 /**
  * Starts a temperature conversion
  */
-int ms5611_start_temp_conv(enum ms5611_osr_rate osrRate, struct regmap_dev_conf* dev);
+int ms5611_start_temp_conv(enum ms5611_osr_rate osrRate, struct reg_bus* dev);
 /**
  * Reads back the conversion result
+ * @param val The pointer to hold the result. NOTE: this is 24-bits only.
  */
-int ms5611_read_conv(uint32_t *val, struct regmap_dev_conf* dev);
+int ms5611_read_conv(uint32_t *val, struct reg_bus* dev);
 
 #endif

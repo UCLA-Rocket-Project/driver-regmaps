@@ -7,16 +7,13 @@
 #define REGMAP_H
 #include <stdbool.h>
 #include <stdint.h>
-#include <regmap/bitmask.h>
+#include "bitmask.h"
 
 /**
  * Represents a device to which register values will be written
  * Each register is 8-bits wide, with address from [0, 255]
  */
-struct regmap_dev_conf {
-	/**
-	 * NOTES: There are no read/write register protection
-	 */
+struct reg_bus {
 	/**
 	 * Reads N bytes from a register
 	 * Returns a negative number on error
@@ -64,30 +61,34 @@ struct reg_field {
  * @param val Location to store the value of the register
  * @param dev The dev to read the field over
  */
-int reg_read(struct reg_field *field, uint8_t *val, struct regmap_dev_conf *dev);
+int reg_read(struct reg_field *field, uint8_t *val, struct reg_bus *dev);
 /**
  * Writes a value to a register
  * @param field The field to write to
  * @param val Value to write
  * @param dev The dev to read the field over
  */
-int reg_write(struct reg_field *field, uint8_t val, struct regmap_dev_conf *dev);
+int reg_write(struct reg_field *field, uint8_t val, struct reg_bus *dev);
 /**
  * Burst reads N registers from a device
  */
-inline int burst_read(uint8_t reg, uint8_t n, uint8_t *vals, struct regmap_dev_conf *dev)
+static inline int burst_read(uint8_t reg, uint8_t n, uint8_t *vals, struct reg_bus *dev)
 {
 	return dev->reg_read(dev->dev_data, reg, n, vals);
 }
 /**
  * Burst writes N registers to a device
  */
-inline int burst_write(uint8_t reg, uint8_t n, uint8_t *vals, struct regmap_dev_conf *dev)
+static inline int burst_write(uint8_t reg, uint8_t n, uint8_t *vals, struct reg_bus *dev)
 {
 	return dev->reg_write(dev->dev_data, reg, n, vals);
 }
 /**
  * Convinience header for defining a REG_FIELD
  */
-#define REG_FIELD( REG, HIGH, LOW ) { .reg=REG, .mask=BITMASK(HIGH, LOW), .lsb=LOW}
+#define REG_FIELD( LABEL, REG, HIGH, LOW ) struct reg_field LABEL = { .reg=REG, .mask=BITMASK(HIGH, LOW), .lsb=LOW};
+/**
+ * Convinience header for defining a REG_FIELD that is 1 byte wide
+ */
+#define REG_BYTE( LABEL, REG ) REG_FIELD(LABEL, REG, 7, 0)
 #endif
