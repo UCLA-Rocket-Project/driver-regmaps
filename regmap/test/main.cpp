@@ -18,6 +18,6 @@ TEST(merge_2_masks) {
 	ASSERT_EQUAL(mergeResult, 0x1221);
 }
 TEST(merge_n_masks) {
-	auto mergeResult = mergeMasks<WORD_BYTE_H, WORD_BYTE_L>(25, 23);
+	auto mergeResult = mergeMasks<WORD_BYTE_H, WORD_BYTE_L>(25, 24);
 }
 TEST_MAIN()

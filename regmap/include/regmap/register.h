@@ -3,6 +3,7 @@
 #include <type_traits>
 #include "bitstuff.h"
 #include "endianfix.h"
+#include <algorithm>
 
 namespace regmap {
 	/* Register definitions */
@@ -63,17 +64,6 @@ namespace regmap {
 		return (value & bitmask<MASK>()) >> MASK::maskLow;
 	}
 	/* Register mask merging */
-	// define min and max here
-	template <typename MASK1, typename MASK2>
-	constexpr uint8_t minLowBit() {
-		return (MaskL<MASK1>() < MaskL<MASK2>()) ? MaskL<MASK1>() : MaskL<MASK2>();
-	}
-	template <typename MASK1, typename MASK2>
-	constexpr uint8_t maxHighBit() {
-		return (MaskH<MASK1>() > MaskH<MASK2>()) ? MaskH<MASK1>() : MaskH<MASK2>();
-	}
-
-	// the value version
 	template <typename MASK1, typename MASK2>
 	using SameReg = std::is_same<RegOf<MASK1>, RegOf<MASK2>>;
 	template <typename MASK1, typename MASK2>
@@ -85,22 +75,10 @@ namespace regmap {
 			"Can only merge 2 masks of the same register");
 		return shiftInValue<MASK1>(val1) | shiftInValue<MASK2>(val2);
 	}
-	// the type version
-	template <typename MASK1, typename MASK2>
-	using Merge2Masks = std::enable_if_t<SameReg<MASK1, MASK2>::value,
-		RegMask<
-		    RegOf<MASK1>,
-	        maxHighBit<MASK1, MASK2>(),
-            minLowBit<MASK1, MASK2>()
-        >>;
 	/* **begin chants to summon the god of meta-programming** */
-	/*
-	 * top-level: exists solely for the compiler
-	 */
-	// value version
+	// top-level: exists solely for the compiler
 	template <typename ...MASKS>
 	constexpr unsigned int mergeMasks();
-	// type version
 
 	// base case: merge zero masks. In that case, return 0
 	template <>
@@ -109,13 +87,20 @@ namespace regmap {
 	}
 	// recursive case: mergeMasks(head, tail) => merge2Masks(head, mergeMasks(tail))
 	template <typename HEAD, typename...TAIL>
-	constexpr RegType<RegOf<HEAD>> mergeMasks(
-		RegType<RegOf<HEAD>> headVal,
-		RegType<RegOf<TAIL>>...tailVals) {
+	constexpr MaskType<HEAD> mergeMasks(
+		MaskType<HEAD> headVal,
+		MaskType<HEAD> tailVals...) {
 
-		auto tail = mergeMasks<TAIL...>(tailVals...);
-		return mergeMasks<HEAD, decltype(tail)>(headVal, tailVals...);
+		auto tail = mergeMasks<TAIL...>(tailVals);
+		return mergeMasks<HEAD, decltype(tail)>(headVal, tailVals);
 	}
+	// the type version
+	template <typename HEAD, typename... REST>
+	using MergeMasks = RegMask<
+		RegOf<HEAD>,
+		std::max(HEAD::maskHigh, REST::maskHigh...),
+		std::min(HEAD::maskLow, REST::maskLow...)
+	>;
 }
 
 #define REG(NAME, ADDR, HIGHBIT, LOWBIT) constexpr regmap::Register NAME = regmap::newRegister(ADDR, HIGHBIT, LOWBIT);
