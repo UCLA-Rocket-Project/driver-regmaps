@@ -7,6 +7,8 @@
  */
 
 /* check addr access */
+class backingReg;
+
 static_assert(RegAddr<ZERO_REG>() == 0, "address access");
 static_assert(RegAddr<ONE_REG>() == 1, "address access");
 static_assert(RegAddr<WORD_REG>() == 0x10, "address access");
