@@ -2,6 +2,7 @@
 #include <cstdint>
 #include <utility>
 #include <initializer_list>
+#include <algorithm>
 #include "bitstuff.h"
 
 namespace regmap {

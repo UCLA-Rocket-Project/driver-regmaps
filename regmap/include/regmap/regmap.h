@@ -5,7 +5,15 @@
 #include <memory>
 #include <cstdint>
 #include "endianfix.h"
+
 namespace regmap {
+	/**
+	 * An implementation of a register map.
+	 * 
+	 * @tparam WORD_SZ the type of each word in the regmap
+	 * @tparam ENDIAN the endianness of the device
+	 * @tparam REGS registers to memoize. Make sure that there are no duplicates in this register!
+	 */
 	template<typename WORD_SZ,
 		endianfix::endian ENDIAN,
 		Register... REGS>
