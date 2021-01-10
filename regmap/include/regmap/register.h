@@ -3,7 +3,7 @@
 #include <type_traits>
 #include "bitstuff.h"
 #include "endianfix.h"
-#include <algorithm>
+#include "minmax.h"
 
 namespace regmap {
 	/* Register definitions */
@@ -98,8 +98,8 @@ namespace regmap {
 	template <typename HEAD, typename... REST>
 	using MergeMasks = RegMask<
 		RegOf<HEAD>,
-		std::max(HEAD::maskHigh, REST::maskHigh...),
-		std::min(HEAD::maskLow, REST::maskLow...)
+		maximum(HEAD::maskHigh, REST::maskHigh...),
+		minimum(HEAD::maskLow, REST::maskLow...)
 	>;
 }
 

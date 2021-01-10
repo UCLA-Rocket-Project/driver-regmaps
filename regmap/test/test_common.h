@@ -15,4 +15,4 @@ using WORD_BYTE_L = RegMask<WORD_REG, 7, 0>;
 
 using MID_NIBBLE = RegMask<ONE_REG, 5, 2>;
 using LOW_BIT = RegMask<ONE_REG, 0, 0>;
-using HIGH_BIT = RegMask<ONE_REG>
+using HIGH_BIT = RegMask<ONE_REG, 7, 7>;
