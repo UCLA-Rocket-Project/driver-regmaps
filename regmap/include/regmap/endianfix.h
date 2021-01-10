@@ -9,7 +9,7 @@ namespace endianfix {
 	 * Comment this out as soon as C++20's new endian stuff is stable:
 	 * 	https://en.cppreference.com/w/cpp/types/endian
 	 */
-		enum class endian {
+	enum class endian {
 	#ifdef _WIN32
 			little = 0,
 			big = 1,
@@ -19,7 +19,7 @@ namespace endianfix {
 			big    = __ORDER_BIG_ENDIAN__,
 			native = __BYTE_ORDER__
 	#endif
-		};
+	};
 
 	/**
 	 * Swapping routines

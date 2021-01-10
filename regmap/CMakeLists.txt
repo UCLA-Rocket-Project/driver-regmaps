@@ -4,3 +4,5 @@ target_sources(regmap INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include/regmap/regma
         ${CMAKE_CURRENT_SOURCE_DIR}/include/regmap/bitstuff.h
         ${CMAKE_CURRENT_SOURCE_DIR}/include/regmap/bus.h
         ${CMAKE_CURRENT_SOURCE_DIR}/include/regmap/endianfix.h)
+
+add_subdirectory(test)
