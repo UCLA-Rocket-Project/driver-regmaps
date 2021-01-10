@@ -10,6 +10,9 @@ using ONE_REG = Register<1, uint8_t>;
 using WORD_REG = Register<0x10, uint16_t>;
 
 /* Define test register masks */
-using MID_NIBBLE = RegMask<ONE_REG, 5, 2>;
 using WORD_BYTE_H = RegMask<WORD_REG, 15, 8>;
 using WORD_BYTE_L = RegMask<WORD_REG, 7, 0>;
+
+using MID_NIBBLE = RegMask<ONE_REG, 5, 2>;
+using LOW_BIT = RegMask<ONE_REG, 0, 0>;
+using HIGH_BIT = RegMask<ONE_REG>
