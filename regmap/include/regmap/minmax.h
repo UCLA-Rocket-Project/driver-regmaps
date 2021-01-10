@@ -1,5 +1,6 @@
-#pragma once
-
+/**
+ * Taken from: https://gist.github.com/thomcc/7739146
+ */
 #pragma once
 #include <utility>
 
