@@ -3,7 +3,7 @@
 #include <type_traits>
 #include "bitstuff.h"
 #include "endianfix.h"
-#include "typeutils.h"
+#include "utils.h"
 
 namespace regmap {
 	/* Register definitions */
@@ -64,12 +64,19 @@ namespace regmap {
 		return (value & bitmask<MASK>()) >> MASK::maskLow;
 	}
 	/* Register mask merging */
-	template <typename MASK1, typename MASK2>
-	using SameReg = std::is_same<RegOf<MASK1>, RegOf<MASK2>>;
+	// the value version
+	// define the base case
+	template <typename ...MASKS>
+	constexpr uint8_t mergeMasks()  {
+		return 0; // or 0 is an identity
+	}
+	// define the recursion
+	template <typename HEAD, typename... REST>
+	constexpr MaskType<HEAD> mergeMasks(MaskType<HEAD> head, MaskType<REST>... rest) {
+		return shiftInValue<HEAD>(head) | mergeMasks<REST...>(rest...);
+	}
 
-
-
-	// the type version
+	// the type version (so easy)
 	template <typename HEAD, typename... REST>
 	using MergeMasks = std::enable_if_t<
 		all_same<RegOf<HEAD>, RegOf<REST>...>::value,
