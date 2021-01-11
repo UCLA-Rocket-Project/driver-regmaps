@@ -1,6 +1,7 @@
 
 #pragma once
 #include <utility>
+#include <tuple>
 
 // varidic max, min, and minmax implementation (named maximum, minimum and min_max to avoid confusion)
 // no support for custom comparators (mainly because i'm not sure how they should be specified)
@@ -35,21 +36,37 @@ namespace regmap {
 		}
 	}
 	/**
-	 * Modified from: https://stackoverflow.com/questions/30346652/enforce-variadic-template-of-certain-type
+	 * Modified from: https://devblogs.microsoft.com/oldnewthing/20200629-00/?p=103910
 	 */
-	namespace types_all_same {
-		template<bool...> struct bool_pack;
-		template<bool... bs>
-		//if any are false, they'll be shifted in the second version, so types won't match
-		using all_true_internal = std::is_same<bool_pack<bs..., true>, bool_pack<true, bs...>>;
-		template <typename... Ts>
-		using all_true = all_true_internal<Ts::value...>;
+	namespace tuple_idx {
+		template<typename T, typename Tuple>
+		struct tuple_element_index_helper;
+		// base case
+		template<typename T>
+		struct tuple_element_index_helper<T, std::tuple<>> {static constexpr std::size_t value = 0;};
+		// recursive case: success
+		template<typename T, typename... Rest>
+		struct tuple_element_index_helper<T, std::tuple<T, Rest...>> {
+			static constexpr std::size_t value = 0;
+			using RestTuple = std::tuple<Rest...>;
+			static_assert(
+				tuple_element_index_helper<T, RestTuple>::value ==
+				std::tuple_size<RestTuple>::value,
+				"type appears more than once in tuple");
+		};
+		// recursive case: fail
+		template<typename T, typename First, typename... Rest>
+		struct tuple_element_index_helper<T, std::tuple<First, Rest...>> {
+			using RestTuple = std::tuple<Rest...>;
+			static constexpr std::size_t value =
+				1 + tuple_element_index_helper<T, RestTuple>::value;
+		};
 	}
 	/*
 	 * Public interfaces
 	 */
 	template <typename T, typename... Ts>
-	using all_same = types_all_same::all_true<std::is_same<T,Ts>...>;
+	using all_same = std::conjunction<std::is_same<T,Ts>...>;
 
 	template <class T, class ...Rest> // requires SameType<T, Rest...>
 	inline constexpr T const &
@@ -60,5 +77,10 @@ namespace regmap {
 	inline constexpr T const &
 	maximum(T const &first, Rest const &... rest) {
 		return minmax::do_max(first, rest...);
+	}
+	template<typename T, typename Tuple>
+	inline constexpr int32_t tupleIndex() {
+		std::size_t index = tuple_idx::tuple_element_index_helper<T, Tuple>::value;
+		return index < std::tuple_size<Tuple>::value ? index : -1;
 	}
 }
