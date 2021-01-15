@@ -1,5 +1,5 @@
 #include <regmap/bus.h>
-#include <regmap/endianfix.h>
+#include <regmap/alufix.h>
 #include <memory>
 #include "ms5611_defs.h"
 

@@ -1,6 +1,6 @@
-[submodule "endian"]
-	path = endian
-	url = https://github.com/boostorg/endian.git
 [submodule "Catch2"]
 	path = Catch2
 	url = https://github.com/catchorg/Catch2
+[submodule "cpp-regmap"]
+	path = cpp-regmap
+	url = https://github.com/saltyJeff/cpp-regmap
