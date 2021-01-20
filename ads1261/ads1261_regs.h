@@ -1,7 +1,12 @@
 #pragma once
-
 #include <regmap/regmap.h>
 namespace ads1261 {
+	/*
+	 * Definitions taken from the ADS126x datasheet:
+	 * https://www.ti.com/lit/ds/symlink/ads1261.pdf
+	 *
+	 * Section 9.6
+	 */
 	// declare registers
 	DECLR_BYTE(ID, 0)
 	DECLR_BYTE(STATUS, 1)
@@ -34,7 +39,6 @@ namespace ads1261 {
 	DECLR_MASK(DRDY, STATUS, 2, 2)
 	DECLR_MASK(CLOCK, STATUS, 1, 1)
 	DECLR_MASK(RESET, STATUS, 0, 0)
-
 	enum DataRate {
 		SPS_2_5,
 		SPS_5,
@@ -74,5 +78,4 @@ namespace ads1261 {
 	DECLR_MASK(CONV_START_DELAY, MODE1, 3, 0)
 	DECLR_MASK(CONN_TO_GPIO, MODE2, 7, 4)
 	DECLR_MASK(GPIO_DIR_INPUT, MODE2, 3, 0)
-	
 }
